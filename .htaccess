@@ -1,0 +1,8 @@
+#berry frame work
+RewriteEngine on
+RewriteRule !\.(ico|gif|jpg|png|css)$ index.php
+
+<Files ~ "^\.(htaccess|htpasswd)$">
+deny from all
+</Files>
+
