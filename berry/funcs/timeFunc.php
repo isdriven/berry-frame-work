@@ -1,9 +1,8 @@
 <?php
 /***
- * タイムスタンプを管理し、その時間差などを判定する
+ * functins of timestamp
  *
  * @Author    :Ippei Sato
- * @Package   :berry_fw_core
  * @Update    :2011.08.17
  */
 class timeFunc
@@ -12,10 +11,7 @@ class timeFunc
     private $key;
     private $db;
 
-    // {{{  public function ts ()
-    /**
-     * タイムスタンプを返す。ただし同一プロセス上では同じ値を返す
-     */
+    // return timestamp. in same process , return same value.
     public function ts()
     {
         if( !isset( $this->ts ) ){
@@ -23,30 +19,19 @@ class timeFunc
         }
         return $this->ts;
     }
-    // }}}
 
-    // {{{  public function setKey ( $key )
-    /**
-     * アプリケーションを識別するキーをセットする
-     */
-    public function setKey( $key )
-    {
-        $this->key = $key;
-    }
-    // }}}
+    // test the timestamp is over the border hour in today.
+    public function isOverBorderTimeStamp( $border_hour /*0-23*/ , $test_timestamp ){
+        $now = $this->ts();
 
-    // {{{  public function setDb ( $db )
-    /**
-     * タイムスタンプを管理するためのDBをセットする
-     * このDbは以下の３つのメソッドを実装している必要がある。
-     *
-     * set( $name , $value )  
-     * get( $name )
-     * del( $name )
-     */
-    public function setDb( $db )
-    {
-        $this->db = $db;
+        // 現在の時間がボーダー時間より下なら、ボーダーは昨日の日時になる
+        $now_hour = intval(date('G', $now ));
+
+        if( intval($now_hour) < intval($border_hour) ){
+            $border_timestamp = mktime( $border_hour , 0 , 0 , date('n',$now) , (date('j',$now)-1) ,date('Y',$now ) );
+        }else{
+            $border_timestamp = mktime( $border_hour , 0 , 0 , date('n',$now) , date('j',$now) ,date('Y',$now ) );
+        }
+        return $border_timestamp < $test_timestamp ;
     }
-    // }}}
 }

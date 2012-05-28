@@ -3,7 +3,6 @@
  * basicな認証を行う
  * 
  * @Author    :Ippei Sato
- * @Pacage    :berry_fw_core
  * @Update    :2012.1.8
  */
 class basic_authFunc

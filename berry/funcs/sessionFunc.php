@@ -1,110 +1,77 @@
 <?php
 /***
- * Sessionの操作を行う
+ * functions of session
  * 
  * @Author    :Ippei Sato
- * @Pacage    :berry_fw_core
- * @Update    :2011.08.01
  */
 class sessionFunc
 {
-    // {{{  public function set ( $name , $value )
-    /**
-     * 値をセットする。既にセットされている場合も上書きする
-     */
-    public function set( $name , $value )
+    // set value , if overwrite is true , write over.
+    public function set( $name , $value , $overwrite = true )
     {
-        $_SESSION[ $name ] = $value;
+        if( !$this->has( $name ) ){
+            $_SESSION[ $name ] = $value;
+            return true;
+        }else if( $overwrite ){
+            $_SESSION[ $name ] = $value;
+            return true;
+        }
+        return false;
     }
     // }}}
 
-    // {{{  public function get( $name )
-    /**
-     * 値を返す。もし値がない場合はnullを返す
-     */
-    public function get( $name )
+    // return value , if no value , return default
+    public function get( $name , $default = null )
     {
-        if( isset( $_SESSION[ $name ] ) ){
+        if( $this->has( $name ) ){
             return $_SESSION[ $name ];
-        }
-        return null;
-    }
-    // }}}
-
-    // {{{  public function has ( $name )
-    /**
-     * 該当する値が設定されているかどうか返す
-     * 設定されていなければ、第二引数を返す(デフォルトはfalse)
-     */
-    public function has( $name , $second = false )
-    {
-        if( isset( $_SESSION[ $name ] ) ){
-            return $_SESSION[ $name ] ;
         }else{
-            return $second;
+            return $default;
         }
     }
     // }}}
 
-    // {{{  public function is ( $name , $value )
-    /**
-     * 第一引数として与えている値が$valueと等しいかどうか返す。
-     * $strictがtrueの時は厳格な比較を行う
-     */
+    // return true , if has the value.
+    public function has( $name )
+    {
+        return isset( $_SESSION[$name] );
+    }
+
+    // test equal or not
     public function is( $name , $value , $strict = false )
     {
-        if( !isset( $_SESSION[ $name ] ) ){
-            return ( $value == null );
-        }
-        if( $_SESSION[ $name ] == $value ){
+        if( $this->has( $name ) ){
             if( $strict ){
-                return ( $_SESSION[ $name ] === $value );
+                return $this->get( $name ) === $value;
+            }else{
+                return $this->get( $name ) === $value;
             }
-            return ( $_SESSION[ $name ] == $value );
         }
     }
-    // }}}
-
-    // {{{  public function keys ()
-    /**
-     * 存在するすべてのキーを返す
-     */
+    
+    // return all keys
     public function keys()
     {
-        $ret = array();
-        foreach( $_SESSION as $k => $v ){
-            $ret[] = $k;
-        }
-        return $ret;
+        return array_keys( $_SESSION );
     }
-    // }}}
 
-    // {{{  public function del ( $name )
-    /**
-     * 指定した名前が存在すれば、削除する
-     */
+    // delete 
     public function del( $name )
     {
-        if( isset( $_SESSION[ $name ] ) ){
+        if( $this->has( $name ) ){
             unset( $_SESSION[ $name ] );
+            return true;
         }
+        return false;
     }
-    // }}
 
-    // {{{  public function delAll ()
-    /**
-     * セション配列を空にする
-     */
+    // truncate session
     public function delAll()
     {
         $_SESSION = array();
     }
-    // }}}
-    
-    // {{{  public function dels ( $list )
-    /**
-     * 指定した名前をすべて削除する。配列を受け取る
-     */
+
+    // delete names
     public function dels( $list )
     {
         if( !is_array( $list ) ){
