@@ -5,12 +5,13 @@ session_start();
  *
  *  this file provides all of frame work.
  * 
- *  @Version   2.0
- *  @Update    2012.02
+ *  @Version   3.0
+ *  @Update    2012.07
  *  @Package   berry frame work
  *  @Author    Ippei Sato
  ************************/
-include( 'forkTemplate.php' );
+include( 'riseTemplate.php' );
+include( 'riseTemplateLibrary.php' );
 
 function berryFrameWork( $config )
 {
@@ -25,8 +26,11 @@ function berryFrameWork( $config )
     $ignore_list = ( is_array( $config->list_ignore ) )? $config->list_ignore:array();
     $change_list = ( is_array( $config->list_change ) )? $config->list_change:array();
     $name_rules   = ( is_null( $config->rule_params ) ) ? 1 : $config->rule_params;
-    $fork = new forkTemplate( $config->path_tags , $config->tags_extension );
-    $fork->constant( 'config' , $config );
+
+    $view = new riseTemplate();
+    $library = new riseTepmlates();
+    $view->setLibrary( $library );
+
     berry::save('controller_path', $config->path_controller);
     berry::save('func_path',  $config->path_func);
     berry::save('model_path', $config->path_model);
@@ -34,7 +38,7 @@ function berryFrameWork( $config )
     berry::save('func',new berryfuncs());
     berry::save('obj',new berryobjs());
     berry::save('model',new berrymodels());
-    berry::save('view' , $fork);
+    berry::save('view' , $view);
     berry::save('template_path', $config->path_template);
     berry::save('name_params', $name_rules);
     berry::save('ignore_list',$ignore_list);
@@ -54,7 +58,6 @@ class berryConfig
                  $this->path_func &&
                  $this->path_model &&
                  $this->path_obj && 
-                 $this->path_tags && 
                  $this->path_template );
     }
 
@@ -279,11 +282,15 @@ class berry
         $auto_template      = ( $obj->config->auto_template )? $obj->config->auto_template:true;
         $output_encoding    = ( $obj->config->output_encoding )? $obj->config->output_encoding:'utf8';
         $template_extension = ( is_string($obj->config->template_extension) )? $obj->config->template_extension:'html';
+
         if( $auto_template ){
             $template_file = "{$obj->_name_controller}/{$obj->_name_action}.{$template_extension}";
+
+
             if( !is_file( berry::load('template_path') . '/' . $template_file ) ){ return false; }
-            $obj->view->render( file_get_contents( $obj->config->path_template . '/' . $template_file ) );
-            $output = $obj->view->contents;
+
+            $output  = $obj->view->render( $obj->config->path_template . '/' . $template_file );
+
             if( $output_encoding !== 'utf8' ){
                 $output = mb_convert_encoding( $output , $output_encoding , 'utf8' );
             }
@@ -309,10 +316,9 @@ class berry
         $params = array_merge($userparams,$_GET,$_POST);
 
         $view = berry::load('view');
-        $view->constant( '_ROOT_' , $nowdir );
-        $view->constant( 'userparams' , $userparams );
-        $view->constant( 'params' , $params );
-		$view->target('_ROOT_')->val( $nowdir );
+        $view->set->_ROOT_ = $nowdir ;
+        $view->set->userparams = $userparams;
+        $view->set->params = $params;
 		
         berry::save('_ROOT_',$nowdir);
         berry::save('userparams',$userparams);
@@ -548,8 +554,7 @@ class berryController
         if( !file_exists( $file_name ) ){
             exit('no file for render :'. $file_name );
         }
-        $this->view->render( file_get_contents( $file_name ) );
-        $buffer = $this->view->contents;
+        $buffer = $this->view->render( file_get_contents( $file_name ) );
 
         $output_encoding    = ( $this->config->output_encoding )? $this->config->output_encoding:'utf8';
 

@@ -5,13 +5,11 @@
 
 class defaultConfig extends berryConfig
 {
-    // __CMS SETTING END__
     //paths {app} = BERRY_APP_DIR
     public $path_controller = '{app}/berry/controllers';
     public $path_model      = '{app}/berry/models';
     public $path_func       = '{app}/berry/funcs';
     public $path_obj        = '{app}/berry/objs';
-    public $path_tags       = '{app}/berry/tags';
     public $path_template   = '{app}/berry/views';
 
     //rules
@@ -25,7 +23,7 @@ class defaultConfig extends berryConfig
 
     //render setting
     public $auto_template      = true;
-    public $template_extension = 'html';
+    public $template_extension = 'php';
     public $output_encoding    = 'utf8';
     public $tags_extension     = 'php';
 } 
